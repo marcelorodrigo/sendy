@@ -1,27 +1,17 @@
 version: 2
 updates:
-  # Docker base images
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
+      interval: "daily"
     labels:
       - "dependencies"
       - "docker"
 
-  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
+      interval: "daily"
     labels:
       - "dependencies"
       - "github-actions"
