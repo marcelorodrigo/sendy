@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Sendy version (e.g., 6.1.2)'
+        description: 'Sendy version to build (e.g, 6.1.3)'
         required: true
         type: string
 
