@@ -1,5 +1,9 @@
 # Sendy Docker
 
+<a href="https://sendy.co/?ref=AQhuL" target="_blank"><img src="https://sendy.co/images/banners/728x90_var2.jpg" alt="Check out Sendy, a self hosted newsletter app that lets you send emails 100x cheaper via Amazon SES." width="728" height="90"/></a>
+
+
+
 Docker image for [Sendy](https://sendy.co) - a self-hosted email newsletter application.
 
 **Supported architectures:** `amd64`, `arm64`
