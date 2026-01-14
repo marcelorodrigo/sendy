@@ -11,6 +11,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,7 +39,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           secrets: |
-            LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
+            SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
           tags: |
             marcelorodrigo/sendy:${{ inputs.version }}
             marcelorodrigo/sendy:latest

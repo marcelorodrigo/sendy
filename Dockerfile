@@ -4,12 +4,12 @@ RUN apk add --no-cache curl unzip
 WORKDIR /tmp
 
 # Download and extract Sendy using build secret
-RUN --mount=type=secret,id=LICENSE_KEY \
+RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
     set -e && \
     echo "Downloading Sendy..." && \
-    if ! curl -fsSL -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/LICENSE_KEY)"; then \
+    if ! curl -fsSL -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/SENDY_LICENSE_KEY)"; then \
         echo "ERROR: Failed to download Sendy. Please verify:" >&2 && \
-        echo "  - Your LICENSE_KEY secret is correct" >&2 && \
+        echo "  - Your SENDY_LICENSE_KEY secret is correct" >&2 && \
         echo "  - You have an active Sendy license" >&2 && \
         echo "  - Network connectivity to sendy.co" >&2 && \
         exit 1; \
