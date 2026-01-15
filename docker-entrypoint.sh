@@ -19,7 +19,12 @@ fi
 # Start supercronic in the background for scheduled tasks
 if [ -f /etc/sendy.crontab ]; then
     echo "Starting supercronic for scheduled tasks..."
-    supercronic /etc/sendy.crontab &
+    if supercronic -test /etc/sendy.crontab; then
+        supercronic /etc/sendy.crontab &
+    else
+        echo "ERROR: Invalid crontab syntax in /etc/sendy.crontab" >&2
+        exit 1
+    fi
 fi
 
 # Hand off to serversideup's S6 init system
