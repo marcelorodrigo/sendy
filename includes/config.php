@@ -30,4 +30,5 @@
 	define('COOKIE_DOMAIN', getenv('SENDY_COOKIE_DOMAIN') ?: '');
 	
 	//----------------------------------------------------------------------------------//
-?> 
+	// Make sure you don't have any spaces or lines after closing the php tag
+?>
