@@ -1,21 +1,46 @@
 # Sendy Docker
 
-<a href="https://sendy.co/?ref=AQhuL" target="_blank"><img src="https://sendy.co/images/banners/728x90_var2.jpg" alt="Check out Sendy, a self hosted newsletter app that lets you send emails 100x cheaper via Amazon SES." width="728" height="90"/></a>
+[![Check out Sendy, a self hosted newsletter app that lets you send emails 100x cheaper via Amazon SES.](https://sendy.co/images/banners/728x90_var2.jpg)](https://sendy.co/?ref=AQhuL)
 
+## What is Sendy?
 
+[Sendy](https://sendy.co/?ref=AQhuL) is a self-hosted email newsletter application that lets you send trackable emails via Amazon
+Simple Email Service (SES). This makes it possible for you to send authenticated bulk emails at an insanely low price
+without sacrificing deliverability.
 
-Docker image for [Sendy](https://sendy.co) - a self-hosted email newsletter application.
+## Community Contribution
 
-**Supported architectures:** `amd64`, `arm64`
+This is a **community maintained Docker image** and is **not an official Sendy product** or endorsed by Sendy.
+It is provided _as-is_ for community use.
+
+For official Sendy licensing, support and documentation: please visit [Sendy.co](https://sendy.co/?ref=AQhuL).
+
+## Features
+
+- 🏭 **Production Ready**: Apache/PHP image based on ServerSideUp/PHP images
+- ⚡ **High Performance**: Fine-tuned for optimal performance with `opcache` optimized for production
+- 🔒 **Security**: Runs as non-root user
+- 💚 **Health Checks**: Native health check support
+- ⚙️ **Easy Configuration**: Simple and intuitive setup
+- ☁️ **CloudFlare Support**: Native CloudFlare support with real IP addresses from trusted proxies
+- 📊 **Unified Logging**: All logs directed to STDOUT & STDERR for centralized output
+- 🔧 **Intelligent Init System**: Apache + FPM + s6 overlay
+- ✅ **Validation**: Required configuration validation on start-up to prevent mistakes
+- 🌐 **Web Server Features**: `.htaccess` support with `mod_rewrite` enabled
+- 📦 **PHP Extensions**: All PHP extensions required by Sendy installed and enabled
+- 🚀 **Latest PHP**: PHP 8.5 with opcache enabled
+- 💾 **Volume Support**: Support for `/upload` volume
+- 🌍 **Translations**: Support for custom Sendy translations
+- 🏗️ **Multi-Architecture**: `amd64` and `arm64` native support
 
 ## Quick Start
-
+If you already have a `MySQL` database for `Sendy`, you can run the container with the following command.
 ```bash
 docker run -d \
   -e SENDY_URL=https://newsletters.example.com \
   -e MYSQL_HOST=db.example.com \
   -e MYSQL_USER=sendy \
-  -e MYSQL_PASSWORD=your_password \
+  -e MYSQL_PASSWORD=Pl3ase_Ch8nge_Me \
   -e MYSQL_DATABASE=sendy \
   -v sendy_uploads:/var/www/html/uploads \
   -p 80:8080 \
@@ -24,6 +49,7 @@ docker run -d \
 ```
 
 ## Docker Compose
+A full example with `MySQL` using `docker-compose` is provided below.
 
 ```yaml
 services:
@@ -36,21 +62,21 @@ services:
       SENDY_URL: "https://newsletters.example.com"
       MYSQL_HOST: "mysql"
       MYSQL_USER: "sendy"
-      MYSQL_PASSWORD: "changeme"
+      MYSQL_PASSWORD: "Pl3ase_Ch8nge_Me"
       MYSQL_DATABASE: "sendy"
     volumes:
       - sendy_uploads:/var/www/html/uploads
-      # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see LOCALE.md)
+      # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see doc/LOCALE.md)
     depends_on:
       - mysql
 
   mysql:
-    image: mysql:8.0
+    image: mysql:8.4
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: ThisIsAS7rongR00tPassw0rd
       MYSQL_DATABASE: sendy
       MYSQL_USER: sendy
-      MYSQL_PASSWORD: changeme
+      MYSQL_PASSWORD: Pl3ase_Ch8nge_Me
     volumes:
       - mysql_data:/var/lib/mysql
 
@@ -63,7 +89,7 @@ volumes:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `SENDY_URL` | Yes | - | Full URL to your Sendy installation (no trailing slash) |
+| `SENDY_URL` | Yes | - | URL to your Sendy installation (without the trailing slash) |
 | `MYSQL_HOST` | No | `mysql` | MySQL hostname |
 | `MYSQL_USER` | Yes | - | MySQL username |
 | `MYSQL_PASSWORD` | Yes | - | MySQL password |
@@ -74,18 +100,16 @@ volumes:
 
 ## Custom Translations
 
-Sendy includes English (en_US) translations by default. To provide custom translations or add additional languages, see [LOCALE.md](LOCALE.md) for detailed instructions.
+Sendy includes English (en_US) translations by default.
+To provide custom translations or add additional languages, see [LOCALE.md](LOCALE.md) for detailed instructions.
 
-## GitHub Secrets (for building)
+## Building your own image
 
-To build this image via GitHub Actions, configure these secrets:
+You can build your own image by cloning this repository. A Sendy license is required to use the application.
 
-| Secret | Description |
-|--------|-------------|
-| `SENDY_LICENSE_KEY` | Your Sendy license key |
-| `DOCKERHUB_USERNAME` | Docker Hub username |
-| `DOCKERHUB_TOKEN` | Docker Hub access token |
-
-## Building
-
-Trigger the workflow manually from GitHub Actions with the desired Sendy version.
+```bash
+git clone git@github.com:marcelorodrigo/sendy.git
+export SENDY_LICENSE_KEY=your_license_key_here
+docker build -t my-sendy-docker --build-arg .
+```
+Make sure to keep your license key safe and never commit it to version control or share it publicly.
