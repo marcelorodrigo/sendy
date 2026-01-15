@@ -67,14 +67,13 @@ COPY --chown=www-data:www-data includes/config.php /var/www/html/includes/config
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Switch to www-data user for runtime
-USER www-data
-
 # Sendy environment variables
 ENV APACHE_DOCUMENT_ROOT="/var/www/html"
 ENV HEALTHCHECK_PATH="/"
 ENV PHP_OPCACHE_ENABLE=1
 
+# Switch to www-data user for runtime
+USER www-data
 VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]
