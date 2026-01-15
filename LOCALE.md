@@ -2,7 +2,7 @@
 
 ## Overview
 
-Sendy includes English (en_US) translations by default in the `/public/locale` directory. This guide explains how to provide custom translations or add additional languages to your Sendy installation.
+Sendy includes English (en_US) translations by default in the `/locale` directory. This guide explains how to provide custom translations or add additional languages to your Sendy installation.
 
 ## Default Locale Structure
 
