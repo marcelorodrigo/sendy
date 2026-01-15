@@ -1,10 +1,10 @@
 # Sendy Docker
 
-<a href="https://sendy.co/?ref=AQhuL" target="_blank"><img src="https://sendy.co/images/banners/728x90_var2.jpg" alt="Check out Sendy, a self hosted newsletter app that lets you send emails 100x cheaper via Amazon SES." width="728" height="90"/></a>
+[![Check out Sendy, a self hosted newsletter app that lets you send emails 100x cheaper via Amazon SES.](https://sendy.co/images/banners/728x90_var2.jpg)](https://sendy.co/?ref=AQhuL)
 
 ## What is Sendy?
 
-[Sendy](https://sendy.co) is a self-hosted email newsletter application that lets you send trackable emails via Amazon
+[Sendy](https://sendy.co/?ref=AQhuL) is a self-hosted email newsletter application that lets you send trackable emails via Amazon
 Simple Email Service (SES). This makes it possible for you to send authenticated bulk emails at an insanely low price
 without sacrificing deliverability.
 
@@ -13,7 +13,7 @@ without sacrificing deliverability.
 This is a **community maintained Docker image** and is **not an official Sendy product** or endorsed by Sendy.
 It is provided _as-is_ for community use.
 
-For official Sendy licensing, support and documentation: please visit [Sendy.co](https://sendy.co).
+For official Sendy licensing, support and documentation: please visit [Sendy.co](https://sendy.co/?ref=AQhuL).
 
 ## Features
 
