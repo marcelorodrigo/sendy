@@ -16,5 +16,11 @@ if [ ${#missing_vars[@]} -ne 0 ]; then
     exit 1
 fi
 
+# Start supercronic in the background for scheduled tasks
+if [ -f /etc/sendy.crontab ]; then
+    echo "Starting supercronic for scheduled tasks..."
+    supercronic /etc/sendy.crontab &
+fi
+
 # Hand off to serversideup's S6 init system
 exec /init "$@"
