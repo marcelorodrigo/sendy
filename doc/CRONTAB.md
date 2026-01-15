@@ -7,6 +7,14 @@ These tasks handle critical operations like scheduling campaigns, processing aut
 
 To ensure these jobs run reliably in a containerized environment, our Docker image comes pre-configured with `supercronic` for task scheduling.
 
+## Automatically Configured Cronjobs
+
+The following background jobs are automatically configured and executed:
+
+- **Scheduled Campaigns** - executing every `5 minutes`
+- **Autoresponders** - executing every `1 minute`
+- **Import Lists** - executing every `1 minute`
+
 ## ✅ Pre-configured in Our Docker Image
 
 The Docker image already has everything set up for you. Here's what's included:
