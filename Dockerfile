@@ -71,6 +71,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER www-data
 
 # Sendy environment variables
+ENV APACHE_DOCUMENT_ROOT="/var/www/html"
 ENV HEALTHCHECK_PATH="/"
 ENV PHP_OPCACHE_ENABLE=1
 
