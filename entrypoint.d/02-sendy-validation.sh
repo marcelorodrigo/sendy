@@ -1,9 +1,9 @@
 #!/bin/sh
 ###################################################
-# Usage: 05-sendy-validation.sh
+# Usage: 02-sendy-validation.sh
 ###################################################
 # This script validates required environment variables for Sendy.
-# It runs during container initialization before the webserver config.
+# It runs early in container initialization, before webserver config and other setup scripts.
 script_name="sendy-validation"
 
 # Validate required environment variables
