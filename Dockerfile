@@ -48,12 +48,6 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
 # Stage 2: Final image
 FROM serversideup/php:8.5-fpm-apache
 
-# Sendy doesn't use a /public subdirectory
-ENV APACHE_DOCUMENT_ROOT=/var/www/html
-
-# Enable OPcache for production performance
-ENV PHP_OPCACHE_ENABLE=1
-
 USER root
 
 # Copy supercronic binary from downloader stage and make it executable
@@ -75,6 +69,11 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Switch to www-data user for runtime
 USER www-data
+
+# Sendy environment variables
+ENV APACHE_DOCUMENT_ROOT=/var/www/html
+ENV HEALTHCHECK_PATH="/"
+ENV PHP_OPCACHE_ENABLE=1
 
 VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]
 
