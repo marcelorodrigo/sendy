@@ -5,7 +5,7 @@ services:
       - "80:8080"
       - "443:8443"
     environment:
-      SENDY_URL: "https://newsletters.example.com"
+      SENDY_URL: "http://localhost"
       MYSQL_HOST: "mysql"
       MYSQL_USER: "sendy"
       MYSQL_PASSWORD: "changeme"

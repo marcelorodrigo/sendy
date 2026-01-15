@@ -92,7 +92,7 @@ docker run -v ./my-crontab:/etc/sendy.crontab ...
 ```
 
 ### Option 2: Modify the Source
-Edit the `sendy.crontab` file in the repository, rebuild the image, and deploy.
+Edit the `sendy.crontab` file at the project root, rebuild the image, and deploy.
 
 ## Crontab Syntax Reference
 
@@ -150,4 +150,3 @@ supercronic: job 1: "*/5 * * * * curl -i http://localhost/scheduled.php"
 - [Sendy Official Documentation](https://sendy.co/?r=docs)
 - [Supercronic GitHub](https://github.com/aptible/supercronic)
 - [Cron Expression Syntax](https://crontab.guru/) - Interactive cron expression builder
-
