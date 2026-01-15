@@ -2,14 +2,14 @@
 
 ## Overview
 
-Sendy includes English (en_US) translations by default in the `/locale` directory. This guide explains how to provide custom translations or add additional languages to your Sendy installation.
+Sendy includes English (en_US) translations by default in the `/public/locale` directory. This guide explains how to provide custom translations or add additional languages to your Sendy installation.
 
 ## Default Locale Structure
 
 The default locale structure from Sendy looks like this:
 
 ```
-/var/www/html/locale/
+/var/www/html/public/locale/
 └── en_US/
     └── LC_MESSAGES/
         ├── default.po
@@ -23,7 +23,7 @@ The default locale structure from Sendy looks like this:
 
 ### Method 1: Mount Your Own Locale Directory
 
-If you provide a volume mount for `/var/www/html/locale`, your translations will completely replace the defaults.
+If you provide a volume mount for `/var/www/html/public/locale`, your translations will completely replace the defaults.
 
 **docker-compose.yml:**
 ```yaml
@@ -31,14 +31,14 @@ services:
   sendy:
     image: marcelorodrigo/sendy:latest
     volumes:
-      - sendy_uploads:/var/www/html/uploads
-      - ./locale:/var/www/html/locale
+      - sendy_uploads:/var/www/html/public/uploads
+      - ./locale:/var/www/html/public/locale
 ```
 
 **Docker run:**
 ```bash
 docker run -d \
-  -v ./locale:/var/www/html/locale \
+  -v ./locale:/var/www/html/public/locale \
   -e SENDY_URL=https://newsletters.example.com \
   ...
   marcelorodrigo/sendy:latest
@@ -53,7 +53,7 @@ To extract the default locale files as a starting point for customization:
 docker compose up -d
 
 # Extract the default locale directory
-docker cp sendy:/var/www/html/locale ./locale
+docker cp sendy:/var/www/html/public/locale ./locale
 
 # Now customize the files in ./locale directory
 # Then mount it using Method 1 above
@@ -104,7 +104,7 @@ Directory structure for supporting English and Portuguese:
 Mount it with:
 ```yaml
 volumes:
-  - ./locale:/var/www/html/locale
+  - ./locale:/var/www/html/public/locale
 ```
 
 ## Verification

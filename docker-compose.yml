@@ -1,6 +1,6 @@
 services:
   sendy:
-    image: marcelorodrigo/sendy:latest
+    image: marcelorodrigo/sendy:6.1.3
     ports:
       - "80:8080"
       - "443:8443"
@@ -14,8 +14,8 @@ services:
       # MYSQL_CHARSET: "utf8mb4"
       # SENDY_COOKIE_DOMAIN: ""
     volumes:
-      - sendy_uploads:/var/www/html/uploads
-      # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see LOCALE.md)
+      - sendy_uploads:/var/www/html/public/uploads
+      # - ./locale:/var/www/html/public/locale  # Optional: provide custom translations (see LOCALE.md)
     depends_on:
       - mysql
 
@@ -27,7 +27,7 @@ services:
       MYSQL_USER: sendy
       MYSQL_PASSWORD: changeme
     volumes:
-      - mysql_data:/var/lib/mysql
+       - mysql_data:/var/lib/mysql
 
 volumes:
   sendy_uploads:

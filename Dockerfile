@@ -58,10 +58,10 @@ RUN chmod +x /usr/local/bin/supercronic
 COPY --chown=www-data:www-data sendy.crontab /etc/sendy.crontab
 
 # Copy Sendy files from downloader stage
-COPY --from=downloader --chown=www-data:www-data /tmp/sendy /var/www/html
+COPY --from=downloader --chown=www-data:www-data /tmp/sendy /var/www/html/public
 
 # Copy our environment-aware config (overwrites vendor config.php)
-COPY --chown=www-data:www-data includes/config.php /var/www/html/includes/config.php
+COPY --chown=www-data:www-data includes/config.php /var/www/html/public/includes/config.php
 
 # Copy and set up entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -71,10 +71,9 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER www-data
 
 # Sendy environment variables
-ENV APACHE_DOCUMENT_ROOT=/var/www/html
 ENV HEALTHCHECK_PATH="/"
 ENV PHP_OPCACHE_ENABLE=1
 
-VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]
+VOLUME ["/var/www/html/public/uploads", "/var/www/html/public/locale"]
 
 ENTRYPOINT ["docker-entrypoint.sh"]

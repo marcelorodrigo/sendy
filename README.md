@@ -17,7 +17,7 @@ docker run -d \
   -e MYSQL_USER=sendy \
   -e MYSQL_PASSWORD=your_password \
   -e MYSQL_DATABASE=sendy \
-  -v sendy_uploads:/var/www/html/uploads \
+  -v sendy_uploads:/var/www/html/public/uploads \
   -p 80:8080 \
   -p 443:8443 \
   marcelorodrigo/sendy:latest
@@ -39,7 +39,8 @@ services:
       MYSQL_PASSWORD: "changeme"
       MYSQL_DATABASE: "sendy"
     volumes:
-      - sendy_uploads:/var/www/html/uploads
+      - sendy_uploads:/var/www/html/public/uploads
+      # - ./locale:/var/www/html/public/locale  # Optional: provide custom translations (see LOCALE.md)
     depends_on:
       - mysql
 
