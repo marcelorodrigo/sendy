@@ -63,9 +63,11 @@ COPY --from=downloader --chown=www-data:www-data /tmp/sendy /var/www/html
 # Copy our environment-aware config (overwrites vendor config.php)
 COPY --chown=www-data:www-data includes/config.php /var/www/html/includes/config.php
 
-# Copy and set up entrypoint
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Copy custom entrypoint scripts
+COPY --chmod=755 entrypoint.d/ /etc/entrypoint.d/
+
+# Copy custom S6 services
+COPY --chmod=755 s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 
 # Sendy environment variables
 ENV APACHE_DOCUMENT_ROOT="/var/www/html"
@@ -75,5 +77,3 @@ ENV PHP_OPCACHE_ENABLE=1
 # Switch to www-data user for runtime
 USER www-data
 VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]
-
-ENTRYPOINT ["docker-entrypoint.sh"]
