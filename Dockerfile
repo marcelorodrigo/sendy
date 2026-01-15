@@ -77,7 +77,6 @@ COPY --chmod=755 s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 
 # Sendy environment variables
 ENV APACHE_DOCUMENT_ROOT="/var/www/html"
-ENV HEALTHCHECK_PATH="/"
 ENV PHP_OPCACHE_ENABLE=1
 
 # Switch to www-data user for runtime
