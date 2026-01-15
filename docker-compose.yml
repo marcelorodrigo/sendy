@@ -1,6 +1,6 @@
 services:
   sendy:
-    image: marcelorodrigo/sendy:latest
+    image: marcelorodrigo/sendy:6.1.3
     ports:
       - "80:8080"
       - "443:8443"
@@ -27,7 +27,7 @@ services:
       MYSQL_USER: sendy
       MYSQL_PASSWORD: changeme
     volumes:
-      - mysql_data:/var/lib/mysql
+       - mysql_data:/var/lib/mysql
 
 volumes:
   sendy_uploads:

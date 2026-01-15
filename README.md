@@ -40,6 +40,7 @@ services:
       MYSQL_DATABASE: "sendy"
     volumes:
       - sendy_uploads:/var/www/html/uploads
+      # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see LOCALE.md)
     depends_on:
       - mysql
 
