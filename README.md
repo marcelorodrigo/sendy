@@ -40,7 +40,7 @@ docker run -d \
   -e SENDY_URL=https://newsletters.example.com \
   -e MYSQL_HOST=db.example.com \
   -e MYSQL_USER=sendy \
-  -e MYSQL_PASSWORD=your_password \
+  -e MYSQL_PASSWORD=Pl3ase_Ch8nge_Me \
   -e MYSQL_DATABASE=sendy \
   -v sendy_uploads:/var/www/html/uploads \
   -p 80:8080 \
@@ -62,7 +62,7 @@ services:
       SENDY_URL: "https://newsletters.example.com"
       MYSQL_HOST: "mysql"
       MYSQL_USER: "sendy"
-      MYSQL_PASSWORD: "changeme"
+      MYSQL_PASSWORD: "Pl3ase_Ch8nge_Me"
       MYSQL_DATABASE: "sendy"
     volumes:
       - sendy_uploads:/var/www/html/uploads
@@ -73,10 +73,10 @@ services:
   mysql:
     image: mysql:8.4
     environment:
-      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_ROOT_PASSWORD: ThisIsAS7rongR00tPassw0rd
       MYSQL_DATABASE: sendy
       MYSQL_USER: sendy
-      MYSQL_PASSWORD: changeme
+      MYSQL_PASSWORD: Pl3ase_Ch8nge_Me
     volumes:
       - mysql_data:/var/lib/mysql
 
