@@ -1,7 +1,22 @@
-# Stage 1: Download and extract Sendy
-FROM alpine:latest AS downloader
+# Stage 1: Download and extract Sendy, install supercronic
+FROM alpine:3.23.2 AS downloader
 RUN apk add --no-cache curl unzip
 WORKDIR /tmp
+
+# Install supercronic for cron jobs (multi-architecture support)
+ARG TARGETARCH
+ENV SUPERCRONIC_VERSION=v0.2.41
+RUN set -e && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-arm64" && \
+        SUPERCRONIC_SHA1SUM="44e10e33e8d98b1d1522f6719f15fb9469786ff0"; \
+    else \
+        SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" && \
+        SUPERCRONIC_SHA1SUM="f70ad28d0d739a96dc9e2087ae370c257e79b8d7"; \
+    fi && \
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+    echo "${SUPERCRONIC_SHA1SUM}  $(basename $SUPERCRONIC_URL)" | sha1sum -c - && \
+    echo "Supercronic download verified."
 
 # Download and extract Sendy using build secret
 RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
@@ -39,6 +54,15 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html
 # Enable OPcache for production performance
 ENV PHP_OPCACHE_ENABLE=1
 
+USER root
+
+# Copy supercronic binary from downloader stage and make it executable
+COPY --from=downloader /tmp/supercronic-linux-* /usr/local/bin/supercronic
+RUN chmod +x /usr/local/bin/supercronic
+
+# Copy crontab file
+COPY --chown=www-data:www-data sendy.crontab /etc/sendy.crontab
+
 # Copy Sendy files from downloader stage
 COPY --from=downloader --chown=www-data:www-data /tmp/sendy /var/www/html
 
@@ -46,10 +70,10 @@ COPY --from=downloader --chown=www-data:www-data /tmp/sendy /var/www/html
 COPY --chown=www-data:www-data includes/config.php /var/www/html/includes/config.php
 
 # Copy and set up entrypoint
-USER root
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Switch to www-data user for runtime
 USER www-data
 
 VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]

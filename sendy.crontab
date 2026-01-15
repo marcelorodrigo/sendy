@@ -1,0 +1,8 @@
+# Scheduling Campaigns
+*/5 * * * * curl -fsSL http://localhost/scheduled.php
+
+# Autoresponders
+*/1 * * * * curl -fsSL http://localhost/autoresponders.php
+
+# CSV Importer
+*/1 * * * * curl -fsSL http://localhost/import-csv.php
