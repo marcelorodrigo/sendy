@@ -14,8 +14,8 @@ services:
       # MYSQL_CHARSET: "utf8mb4"
       # SENDY_COOKIE_DOMAIN: ""
     volumes:
-      - sendy_uploads:/var/www/html/public/uploads
-      # - ./locale:/var/www/html/public/locale  # Optional: provide custom translations (see LOCALE.md)
+      - sendy_uploads:/var/www/html/uploads
+      # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see LOCALE.md)
     depends_on:
       - mysql
 
