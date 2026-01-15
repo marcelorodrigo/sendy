@@ -50,6 +50,9 @@ FROM serversideup/php:8.5-fpm-apache
 
 USER root
 
+# Enable Apache mod_rewrite module
+RUN a2enmod rewrite
+
 # Copy supercronic binary from downloader stage and make it executable
 COPY --from=downloader /tmp/supercronic-linux-* /usr/local/bin/supercronic
 RUN chmod +x /usr/local/bin/supercronic
