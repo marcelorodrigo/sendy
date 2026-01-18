@@ -4,4 +4,5 @@
 
 if -t { test -f /etc/sendy.crontab }
 if -t { /usr/local/bin/supercronic -test /etc/sendy.crontab }
+fdmove -c 2 1
 exec /usr/local/bin/supercronic -debug /etc/sendy.crontab
