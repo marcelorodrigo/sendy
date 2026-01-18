@@ -53,8 +53,8 @@ USER root
 # Enable Apache mod_rewrite module
 RUN a2enmod rewrite
 
-# Install gettext PHP extension
-RUN install-php-extensions gettext
+# Install gettext/calendar PHP extensions
+RUN install-php-extensions gettext calendar
 
 # Copy supercronic binary from downloader stage and make it executable
 COPY --from=downloader /tmp/supercronic-linux-* /usr/local/bin/supercronic
