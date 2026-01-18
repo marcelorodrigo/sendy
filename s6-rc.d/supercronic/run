@@ -1,4 +1,4 @@
-#!/bin/execlineb -P
+#!/command/execlineb -P
 # S6 service to run supercronic for scheduled tasks
 # This service will be automatically restarted by S6 if it exits
 
