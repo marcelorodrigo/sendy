@@ -4,4 +4,4 @@
 
 if -t { test -f /etc/sendy.crontab }
 if -t { /usr/local/bin/supercronic -test /etc/sendy.crontab }
-/usr/local/bin/supercronic /etc/sendy.crontab
+exec /usr/local/bin/supercronic -debug /etc/sendy.crontab
