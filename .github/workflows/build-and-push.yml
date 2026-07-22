@@ -33,12 +33,37 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Verify requested version is the current Sendy release
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
+          PAGE=$(curl -fsSL https://sendy.co/get-updated)
+          LATEST_VERSION=$(printf '%s' "$PAGE" \
+            | grep -oiE '(Download latest version \(v|Get updated v)[0-9]+(\.[0-9]+)+' \
+            | grep -oE '[0-9]+(\.[0-9]+)+' \
+            | head -n1) || true
+          if [ -z "$LATEST_VERSION" ]; then
+            echo "::error::Could not parse the latest Sendy version from https://sendy.co/get-updated. The page structure may have changed; update this step's parser."
+            exit 1
+          fi
+          echo "Latest published Sendy version: ${LATEST_VERSION}"
+          echo "Requested version:              ${REQUESTED_VERSION}"
+          if [ "$REQUESTED_VERSION" != "$LATEST_VERSION" ]; then
+            echo "::error::Requested version '${REQUESTED_VERSION}' is not the current Sendy release '${LATEST_VERSION}'. The download endpoint only serves the latest version the license is entitled to, so building '${REQUESTED_VERSION}' would mislabel the image."
+            exit 1
+          fi
+          echo "Version check passed: ${REQUESTED_VERSION} is the current Sendy release."
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            SENDY_VERSION=${{ inputs.version }}
           secrets: |
             SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
           tags: |
