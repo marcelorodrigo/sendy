@@ -13,6 +13,7 @@ on:
       - '.github/workflows/pr-build.yml'
       - '.github/workflows/build-and-push.yml'
       - '.github/workflows/check-sendy-release.yml'
+      - '.github/actions/resolve-sendy-version/**'
       - '.github/scripts/**'
 
 concurrency:
@@ -20,8 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-smoke-test:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  test-version-parser:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,25 +36,22 @@ jobs:
       - name: Test Sendy version parser
         run: python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v
 
+  build-and-smoke-test:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          show-progress: false
+          fetch-tags: false
+
       - name: Resolve latest Sendy version
         id: resolve_version
-        run: |
-          set -euo pipefail
-          echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
-          PAGE_FILE=$(mktemp)
-          trap 'rm -f "$PAGE_FILE"' EXIT
-          curl \
-            --connect-timeout 10 \
-            --max-time 30 \
-            --retry 3 \
-            --retry-all-errors \
-            --retry-delay 5 \
-            -fsSL \
-            -o "$PAGE_FILE" \
-            https://sendy.co/get-updated
-          LATEST_VERSION=$(python3 .github/scripts/extract_sendy_version.py "$PAGE_FILE")
-          echo "Latest published Sendy version: ${LATEST_VERSION}"
-          echo "version=${LATEST_VERSION}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/resolve-sendy-version
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

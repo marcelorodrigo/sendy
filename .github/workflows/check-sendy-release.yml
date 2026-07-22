@@ -22,26 +22,11 @@ jobs:
           fetch-depth: 1
           show-progress: false
           fetch-tags: false
+          persist-credentials: false
 
       - name: Resolve latest Sendy version
         id: release
-        run: |
-          set -euo pipefail
-          echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
-          PAGE_FILE=$(mktemp)
-          trap 'rm -f "$PAGE_FILE"' EXIT
-          curl \
-            --connect-timeout 10 \
-            --max-time 30 \
-            --retry 3 \
-            --retry-all-errors \
-            --retry-delay 5 \
-            -fsSL \
-            -o "$PAGE_FILE" \
-            https://sendy.co/get-updated
-          LATEST_VERSION=$(python3 .github/scripts/extract_sendy_version.py "$PAGE_FILE")
-          echo "Latest published Sendy version: ${LATEST_VERSION}"
-          echo "version=${LATEST_VERSION}" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/resolve-sendy-version
 
       - name: Check Docker Hub version tag
         id: registry
@@ -98,4 +83,7 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       version: ${{ needs.check.outputs.version }}
-    secrets: inherit
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      SENDY_LICENSE_KEY: ${{ secrets.SENDY_LICENSE_KEY }}

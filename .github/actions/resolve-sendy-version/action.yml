@@ -1,0 +1,33 @@
+name: Resolve Sendy version
+description: Download the Sendy update page and resolve the latest published version
+
+outputs:
+  version:
+    description: The latest published Sendy version
+    value: ${{ steps.resolve.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve latest Sendy version
+      id: resolve
+      shell: bash
+      env:
+        VERSION_PARSER: ${{ github.action_path }}/../../scripts/extract_sendy_version.py
+      run: |
+        set -euo pipefail
+        echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
+        PAGE_FILE=$(mktemp)
+        trap 'rm -f "$PAGE_FILE"' EXIT
+        curl \
+          --connect-timeout 10 \
+          --max-time 30 \
+          --retry 3 \
+          --retry-all-errors \
+          --retry-delay 5 \
+          -fsSL \
+          -o "$PAGE_FILE" \
+          https://sendy.co/get-updated
+        LATEST_VERSION=$(python3 "$VERSION_PARSER" "$PAGE_FILE")
+        echo "Latest published Sendy version: ${LATEST_VERSION}"
+        echo "version=${LATEST_VERSION}" >> "$GITHUB_OUTPUT"

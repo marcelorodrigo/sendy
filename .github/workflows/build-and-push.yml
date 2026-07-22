@@ -51,25 +51,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Resolve latest Sendy version
+        id: release
+        uses: ./.github/actions/resolve-sendy-version
+
       - name: Verify requested version is the current Sendy release
         env:
           REQUESTED_VERSION: ${{ inputs.version }}
+          LATEST_VERSION: ${{ steps.release.outputs.version }}
         run: |
           set -euo pipefail
-          echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
-          PAGE_FILE=$(mktemp)
-          trap 'rm -f "$PAGE_FILE"' EXIT
-          curl \
-            --connect-timeout 10 \
-            --max-time 30 \
-            --retry 3 \
-            --retry-all-errors \
-            --retry-delay 5 \
-            -fsSL \
-            -o "$PAGE_FILE" \
-            https://sendy.co/get-updated
-          LATEST_VERSION=$(python3 .github/scripts/extract_sendy_version.py "$PAGE_FILE")
-          echo "Latest published Sendy version: ${LATEST_VERSION}"
           echo "Requested version:              ${REQUESTED_VERSION}"
           if [ "$REQUESTED_VERSION" != "$LATEST_VERSION" ]; then
             echo "::error::Requested version '${REQUESTED_VERSION}' is not the current Sendy release '${LATEST_VERSION}'. The download endpoint only serves the latest version the license is entitled to, so building '${REQUESTED_VERSION}' would mislabel the image."
