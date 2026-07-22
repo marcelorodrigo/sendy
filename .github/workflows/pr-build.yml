@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   build-and-smoke-test:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
-          PAGE=$(curl -fsSL https://sendy.co/get-updated)
+          PAGE=$(curl --connect-timeout 10 --max-time 30 -fsSL https://sendy.co/get-updated)
           LATEST_VERSION=$(printf '%s' "$PAGE" \
             | grep -oiE '(Download latest version \(v|Get updated v)[0-9]+(\.[0-9]+)+' \
             | grep -oE '[0-9]+(\.[0-9]+)+' \
