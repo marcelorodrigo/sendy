@@ -18,11 +18,19 @@ RUN set -e && \
     echo "${SUPERCRONIC_SHA1SUM}  $(basename $SUPERCRONIC_URL)" | sha1sum -c - && \
     echo "Supercronic download verified."
 
+# Expected Sendy version, asserted against the actual download below
+ARG SENDY_VERSION
+
 # Download and extract Sendy using build secret
 RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
     set -e && \
-    echo "Downloading Sendy..." && \
-    if ! curl -fsSL -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/SENDY_LICENSE_KEY)"; then \
+    if [ -z "$SENDY_VERSION" ]; then \
+        echo "ERROR: SENDY_VERSION build argument is required but was not provided." >&2 && \
+        echo "Pass it with: docker build --build-arg SENDY_VERSION=<X.Y.Z>" >&2 && \
+        exit 1; \
+    fi && \
+    echo "Downloading Sendy (expecting version ${SENDY_VERSION})..." && \
+    if ! curl -fsSL -D headers.txt -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/SENDY_LICENSE_KEY)"; then \
         echo "ERROR: Failed to download Sendy. Please verify:" >&2 && \
         echo "  - Your SENDY_LICENSE_KEY secret is correct" >&2 && \
         echo "  - You have an active Sendy license" >&2 && \
@@ -35,6 +43,20 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
         echo "This usually means the license key is invalid or expired." >&2 && \
         exit 1; \
     fi && \
+    echo "Verifying downloaded version..." && \
+    ACTUAL_VERSION=$(grep -i 'content-disposition' headers.txt | grep -oiE 'sendy-[0-9]+(\.[0-9]+)+' | grep -oE '[0-9]+(\.[0-9]+)+' | head -n1) && \
+    if [ -z "$ACTUAL_VERSION" ]; then \
+        echo "ERROR: Could not determine the downloaded Sendy version from the response headers." >&2 && \
+        echo "Expected a 'Content-Disposition' header with a filename like 'sendy-X.Y.Z.zip'." >&2 && \
+        exit 1; \
+    fi && \
+    if [ "$ACTUAL_VERSION" != "$SENDY_VERSION" ]; then \
+        echo "ERROR: Version mismatch. Requested '${SENDY_VERSION}' but sendy.co served '${ACTUAL_VERSION}'." >&2 && \
+        echo "The download endpoint only serves the latest version your license is entitled to." >&2 && \
+        echo "Either build version '${ACTUAL_VERSION}', or upgrade the license to reach '${SENDY_VERSION}'." >&2 && \
+        exit 1; \
+    fi && \
+    echo "Verified: downloaded version ${ACTUAL_VERSION} matches requested version." && \
     echo "Extracting Sendy..." && \
     unzip -q sendy.zip && \
     if [ ! -d "sendy" ]; then \
@@ -42,8 +64,8 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
         echo "The downloaded ZIP file may be corrupted or invalid." >&2 && \
         exit 1; \
     fi && \
-    rm sendy.zip && \
-    echo "Sendy download complete."
+    rm sendy.zip headers.txt && \
+    echo "Sendy download complete (version ${ACTUAL_VERSION})."
 
 # Stage 2: Final image
 FROM serversideup/php:8.5-fpm-apache
