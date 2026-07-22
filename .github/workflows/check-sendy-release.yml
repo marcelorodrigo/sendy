@@ -1,0 +1,89 @@
+name: Check for Sendy releases
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check latest Sendy release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      should_build: ${{ steps.registry.outputs.should_build }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          show-progress: false
+          fetch-tags: false
+          persist-credentials: false
+
+      - name: Resolve latest Sendy version
+        id: release
+        uses: ./.github/actions/resolve-sendy-version
+
+      - name: Check Docker Hub version tag
+        id: registry
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          TOKEN_RESPONSE=$(curl \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            -fsSL \
+            'https://auth.docker.io/token?service=registry.docker.io&scope=repository:marcelorodrigo/sendy:pull')
+          TOKEN=$(printf '%s' "$TOKEN_RESPONSE" | python3 -c \
+            'import json, sys; print(json.load(sys.stdin)["token"])')
+
+          HTTP_STATUS=$(curl \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --silent \
+            --show-error \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${TOKEN}" \
+            --header 'Accept: application/vnd.oci.image.index.v1+json' \
+            --header 'Accept: application/vnd.docker.distribution.manifest.list.v2+json' \
+            "https://registry-1.docker.io/v2/marcelorodrigo/sendy/manifests/${VERSION}")
+
+          case "$HTTP_STATUS" in
+            200)
+              echo "Docker image marcelorodrigo/sendy:${VERSION} already exists; no build is needed."
+              echo "should_build=false" >> "$GITHUB_OUTPUT"
+              ;;
+            404)
+              echo "Docker image marcelorodrigo/sendy:${VERSION} does not exist; starting a build."
+              echo "should_build=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "::error::Docker registry returned HTTP ${HTTP_STATUS} while checking marcelorodrigo/sendy:${VERSION}."
+              exit 1
+              ;;
+          esac
+
+  build:
+    name: Build new Sendy release
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      version: ${{ needs.check.outputs.version }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      SENDY_LICENSE_KEY: ${{ secrets.SENDY_LICENSE_KEY }}
