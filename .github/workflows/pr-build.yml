@@ -11,6 +11,9 @@ on:
       - 'includes/config.php'
       - 'sendy.crontab'
       - '.github/workflows/pr-build.yml'
+      - '.github/workflows/build-and-push.yml'
+      - '.github/workflows/check-sendy-release.yml'
+      - '.github/scripts/**'
 
 concurrency:
   group: pr-build-${{ github.event.pull_request.number }}
@@ -30,20 +33,26 @@ jobs:
           show-progress: false
           fetch-tags: false
 
+      - name: Test Sendy version parser
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v
+
       - name: Resolve latest Sendy version
         id: resolve_version
         run: |
           set -euo pipefail
           echo "Fetching latest Sendy version from https://sendy.co/get-updated ..."
-          PAGE=$(curl --connect-timeout 10 --max-time 30 -fsSL https://sendy.co/get-updated)
-          LATEST_VERSION=$(printf '%s' "$PAGE" \
-            | grep -oiE '(Download latest version \(v|Get updated v)[0-9]+(\.[0-9]+)+' \
-            | grep -oE '[0-9]+(\.[0-9]+)+' \
-            | head -n1) || true
-          if [ -z "$LATEST_VERSION" ]; then
-            echo "::error::Could not parse the latest Sendy version from https://sendy.co/get-updated. The page structure may have changed; update this step's parser."
-            exit 1
-          fi
+          PAGE_FILE=$(mktemp)
+          trap 'rm -f "$PAGE_FILE"' EXIT
+          curl \
+            --connect-timeout 10 \
+            --max-time 30 \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            -fsSL \
+            -o "$PAGE_FILE" \
+            https://sendy.co/get-updated
+          LATEST_VERSION=$(python3 .github/scripts/extract_sendy_version.py "$PAGE_FILE")
           echo "Latest published Sendy version: ${LATEST_VERSION}"
           echo "version=${LATEST_VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -105,7 +114,7 @@ jobs:
 
           echo "Waiting for the container to become ready..."
           READY=""
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if [ "$(docker inspect -f '{{.State.Running}}' "$CONTAINER_ID" 2>/dev/null)" != "true" ]; then
               echo "::error::Container exited unexpectedly while waiting for readiness."
               exit 1
