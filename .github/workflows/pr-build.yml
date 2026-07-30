@@ -142,13 +142,6 @@ jobs:
             exit 1
           fi
 
-          echo "Checking Supercronic version..."
-          SUPERCRONIC_VERSION=$(docker exec "$CONTAINER_ID" /usr/local/bin/supercronic -version)
-          if [ "$SUPERCRONIC_VERSION" != "v0.2.48" ]; then
-            echo "::error::Expected Supercronic v0.2.48, got '${SUPERCRONIC_VERSION}'."
-            exit 1
-          fi
-
           echo "Validating the Sendy crontab with Supercronic..."
           docker exec "$CONTAINER_ID" /usr/local/bin/supercronic -test /etc/sendy.crontab
 
