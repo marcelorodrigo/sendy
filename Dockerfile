@@ -5,17 +5,17 @@ WORKDIR /tmp
 
 # Install supercronic for cron jobs (multi-architecture support)
 ARG TARGETARCH
-ENV SUPERCRONIC_VERSION=v0.2.41
+ENV SUPERCRONIC_VERSION=v0.2.48
 RUN set -e && \
     if [ "$TARGETARCH" = "arm64" ]; then \
         SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-arm64" && \
-        SUPERCRONIC_SHA1SUM="44e10e33e8d98b1d1522f6719f15fb9469786ff0"; \
+        SUPERCRONIC_SHA256SUM="50ae8755e04fa72812d0a1bc47a112a856811cc91cce7b6c875c378a850788bc"; \
     else \
         SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" && \
-        SUPERCRONIC_SHA1SUM="f70ad28d0d739a96dc9e2087ae370c257e79b8d7"; \
+        SUPERCRONIC_SHA256SUM="88c1b66b94c486f972fdd1a4d1f901e3e75ff04f749cddd60c5db573e3a33c6c"; \
     fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
-    echo "${SUPERCRONIC_SHA1SUM}  $(basename $SUPERCRONIC_URL)" | sha1sum -c - && \
+    echo "${SUPERCRONIC_SHA256SUM}  $(basename "$SUPERCRONIC_URL")" | sha256sum -c - && \
     echo "Supercronic download verified."
 
 # Expected Sendy version, asserted against the actual download below
