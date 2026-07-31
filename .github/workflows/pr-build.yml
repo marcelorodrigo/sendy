@@ -142,4 +142,7 @@ jobs:
             exit 1
           fi
 
+          echo "Validating the Sendy crontab with Supercronic..."
+          docker exec "$CONTAINER_ID" /usr/local/bin/supercronic -test /etc/sendy.crontab
+
           echo "Boot smoke test passed."
