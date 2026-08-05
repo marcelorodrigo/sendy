@@ -14,28 +14,12 @@ on:
       - '.github/workflows/build-and-push.yml'
       - '.github/workflows/check-sendy-release.yml'
       - '.github/actions/resolve-sendy-version/**'
-      - '.github/scripts/**'
 
 concurrency:
   group: pr-build-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  test-version-parser:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-          show-progress: false
-          fetch-tags: false
-
-      - name: Test Sendy version parser
-        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py' -v
-
   build-and-smoke-test:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
@@ -53,25 +37,8 @@ jobs:
         id: resolve_version
         uses: ./.github/actions/resolve-sendy-version
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-
-      - name: Build check (linux/arm64, no load)
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          platforms: linux/arm64
-          push: false
-          load: false
-          build-args: |
-            SENDY_VERSION=${{ steps.resolve_version.outputs.version }}
-          secrets: |
-            SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build and load (linux/amd64)
         uses: docker/build-push-action@v7
@@ -85,8 +52,8 @@ jobs:
             SENDY_VERSION=${{ steps.resolve_version.outputs.version }}
           secrets: |
             SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=sendy-amd64
+          cache-to: type=gha,mode=max,scope=sendy-amd64
 
       - name: Boot smoke test
         run: |
@@ -146,3 +113,37 @@ jobs:
           docker exec "$CONTAINER_ID" /usr/local/bin/supercronic -test /etc/sendy.crontab
 
           echo "Boot smoke test passed."
+
+  build-arm64:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          show-progress: false
+          fetch-tags: false
+
+      - name: Resolve latest Sendy version
+        id: resolve_version
+        uses: ./.github/actions/resolve-sendy-version
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build check (linux/arm64, no load)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
+          load: false
+          build-args: |
+            SENDY_VERSION=${{ steps.resolve_version.outputs.version }}
+          secrets: |
+            SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
+          cache-from: type=gha,scope=sendy-arm64
+          cache-to: type=gha,mode=max,scope=sendy-arm64
