@@ -1,5 +1,5 @@
 # Stage 1: Download and extract Sendy, install supercronic
-FROM alpine:3.24.1 AS downloader
+FROM alpine:3.24.2 AS downloader
 RUN apk add --no-cache curl unzip
 WORKDIR /tmp
 
