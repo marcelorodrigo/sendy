@@ -13,6 +13,7 @@ services:
       # MYSQL_PORT: "3306"
       # MYSQL_CHARSET: "utf8mb4"
       # SENDY_COOKIE_DOMAIN: ""
+      # TRUSTED_PROXY: "local"  # Set when behind a reverse proxy (cloudflare|sucuri|local|off)
     volumes:
       - sendy_uploads:/var/www/html/uploads
       # - ./locale:/var/www/html/locale  # Optional: provide custom translations (see LOCALE.md)
