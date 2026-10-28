@@ -85,6 +85,33 @@ volumes:
   mysql_data:
 ```
 
+## Health Checks
+
+The image ships a health check that probes Apache and PHP-FPM over HTTP using `curl`. The runtime image includes `curl` but **not** `wget`, and the check runs every 10 seconds after a 60-second start period.
+
+The probe targets `http://localhost:${APACHE_HTTP_PORT}${HEALTHCHECK_PATH}`, which defaults to `http://localhost:8080/healthcheck`. That path is proxied directly to PHP-FPM, so it reports whether the web server and PHP are accepting connections, not whether the Sendy database is reachable. Set `HEALTHCHECK_PATH` to a path served by your application if you want the check to cover Sendy itself.
+
+Docker Compose deployments inherit this check automatically. Nothing needs to be added to `docker-compose.yml`.
+
+### Coolify
+
+Coolify generates its own health check and replaces the one from the image. Point it at the **internal** port `8080`, not the published port `80`:
+
+| Setting | Value |
+|---------|-------|
+| **Ports Exposes** (Configuration → General) | `8080` |
+| **Check type** | HTTP |
+| **Method** | `GET` |
+| **Scheme** | `http` |
+| **Host** | `localhost` |
+| **Port** | `8080`, or empty to use Ports Exposes |
+| **Path** | `/` |
+| **Start period** | `30` seconds or more |
+
+If the port stays at `80` the probe cannot connect, and the deployment is rolled back as unhealthy even though the application is running.
+
+The generated check calls `curl` first and falls back to `wget` only if `curl` fails, so `wget` is not required in the image.
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
