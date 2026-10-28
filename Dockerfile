@@ -5,14 +5,14 @@ WORKDIR /tmp
 
 # Install supercronic for cron jobs (multi-architecture support)
 ARG TARGETARCH
-ENV SUPERCRONIC_VERSION=v0.2.48
+ENV SUPERCRONIC_VERSION=v0.2.51
 RUN set -e && \
     if [ "$TARGETARCH" = "arm64" ]; then \
         SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-arm64" && \
-        SUPERCRONIC_SHA256SUM="50ae8755e04fa72812d0a1bc47a112a856811cc91cce7b6c875c378a850788bc"; \
+        SUPERCRONIC_SHA256SUM="4ae22576a78223d8ccdf5f3b3660a5cbb5288416bf0ca96afc4a36d195932b94"; \
     else \
         SUPERCRONIC_URL="https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" && \
-        SUPERCRONIC_SHA256SUM="88c1b66b94c486f972fdd1a4d1f901e3e75ff04f749cddd60c5db573e3a33c6c"; \
+        SUPERCRONIC_SHA256SUM="cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123"; \
     fi && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
     echo "${SUPERCRONIC_SHA256SUM}  $(basename "$SUPERCRONIC_URL")" | sha256sum -c - && \
