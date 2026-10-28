@@ -97,6 +97,7 @@ volumes:
 | `MYSQL_PORT` | No | `3306` | MySQL port |
 | `MYSQL_CHARSET` | No | `utf8mb4` | Database character set |
 | `SENDY_COOKIE_DOMAIN` | No | `''` | Cookie domain (rarely needs changing) |
+| `TRUSTED_PROXY` | No | `cloudflare` | Reverse proxy IPs trusted to pass the real client IP: `cloudflare`, `sucuri`, `local`, or `off`. Set to `local` when running behind your own reverse proxy (Traefik, nginx, Caddy, etc.) |
 
 ## Custom Translations
 
