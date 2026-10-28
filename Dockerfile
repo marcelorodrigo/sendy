@@ -97,6 +97,9 @@ COPY --chmod=755 entrypoint.d/ /etc/entrypoint.d/
 # Copy custom S6 services
 COPY --chmod=755 s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 
+# Add custom S6 services to the user bundle (S6 Overlay v3.2.3+ location)
+COPY --chmod=755 user-bundles.d/ /etc/s6-overlay/user-bundles.d/
+
 # Sendy environment variables
 ENV APACHE_DOCUMENT_ROOT="/var/www/html"
 ENV PHP_OPCACHE_ENABLE=1
