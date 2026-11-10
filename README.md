@@ -90,11 +90,11 @@ volumes:
 | Tag | Description |
 |-----|-------------|
 | `latest` | The most recent Sendy release. Rebuilt each time a new Sendy version is published. |
-| `X.Y.Z` | Pinned to that exact Sendy release (for example `6.1.3`). Use this for reproducible deployments. |
+| `X.Y.Z` | Pinned to that Sendy release (for example `7.1.7`). For fully reproducible deployments, pin the image digest (`marcelorodrigo/sendy@sha256:...`), because a tag can be republished with different image contents. |
 
 Only the current Sendy release is published. The Sendy download endpoint serves the latest
-version your license is entitled to, so older release tags are not rebuilt. Browse all
-available tags on [Docker Hub](https://hub.docker.com/r/marcelorodrigo/sendy/tags).
+version your license is entitled to, so older release tags are not rebuilt automatically. Browse
+all available tags on [Docker Hub](https://hub.docker.com/r/marcelorodrigo/sendy/tags).
 
 ## Environment Variables
 
@@ -156,15 +156,16 @@ You can build your own image by cloning this repository. A Sendy license is requ
 git clone https://github.com/marcelorodrigo/sendy.git
 cd sendy
 export SENDY_LICENSE_KEY=your_license_key_here
-export SENDY_VERSION=7.1.7  # must match the current Sendy release
+export SENDY_VERSION=7.1.7  # must match the version your license downloads
 docker build \
   --build-arg SENDY_VERSION="${SENDY_VERSION}" \
   --secret id=SENDY_LICENSE_KEY,env=SENDY_LICENSE_KEY \
   -t "my-sendy:${SENDY_VERSION}" .
 ```
 
-The `SENDY_VERSION` build argument must match the current Sendy release; the build fails if the
-downloaded version differs. Check the latest version at
-[sendy.co](https://sendy.co/?ref=AQhuL) or from the
+The `SENDY_VERSION` build argument must match the version your license is entitled to and the
+version actually downloaded during the build; the build fails if the downloaded version differs.
+The public latest release is informational guidance only — see
+[sendy.co](https://sendy.co/?ref=AQhuL) or the
 [version endpoint](https://gateway.sendy.co/version-checker). Make sure to keep your license key
 safe and never commit it to version control or share it publicly.
