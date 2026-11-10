@@ -29,7 +29,7 @@ For official Sendy licensing, support and documentation: please visit [Sendy.co]
 - 🌐 **Web Server Features**: `.htaccess` support with `mod_rewrite` enabled
 - 📦 **PHP Extensions**: All PHP extensions required by Sendy installed and enabled
 - 🚀 **Latest PHP**: PHP 8.5 with opcache enabled
-- 💾 **Volume Support**: Support for `/upload` volume
+- 💾 **Volume Support**: Support for `/var/www/html/uploads` and `/var/www/html/locale` volumes
 - 🌍 **Translations**: Support for custom Sendy translations
 - 🏗️ **Multi-Architecture**: `amd64` and `arm64` native support
 
@@ -85,6 +85,17 @@ volumes:
   mysql_data:
 ```
 
+## Image Tags
+
+| Tag | Description |
+|-----|-------------|
+| `latest` | The most recent Sendy release. Rebuilt each time a new Sendy version is published. |
+| `X.Y.Z` | Pinned to that exact Sendy release (for example `6.1.3`). Use this for reproducible deployments. |
+
+Only the current Sendy release is published. The Sendy download endpoint serves the latest
+version your license is entitled to, so older release tags are not rebuilt. Browse all
+available tags on [Docker Hub](https://hub.docker.com/r/marcelorodrigo/sendy/tags).
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
@@ -102,15 +113,58 @@ volumes:
 ## Custom Translations
 
 Sendy includes English (en_US) translations by default.
-To provide custom translations or add additional languages, see [LOCALE.md](LOCALE.md) for detailed instructions.
+To provide custom translations or add additional languages, see [LOCALE.md](doc/LOCALE.md) for detailed instructions.
 
-## Building your own image
+## Source and Build Provenance
+
+This image is built and published by GitHub Actions from
+[marcelorodrigo/sendy](https://github.com/marcelorodrigo/sendy) using the
+[build-and-push workflow](https://github.com/marcelorodrigo/sendy/blob/master/.github/workflows/build-and-push.yml).
+
+- Multi-architecture images for `linux/amd64` and `linux/arm64`.
+- Based on `serversideup/php:8.5-fpm-apache-v5.0.5`.
+- Each platform is built separately, published by digest, then combined into the version and `latest` tags.
+- The Sendy license key is supplied as a BuildKit secret at build time and is never stored in the image or the repository.
+
+Every image carries OCI metadata labels. Inspect them on a pulled image:
+
+```bash
+docker image inspect marcelorodrigo/sendy:latest \
+  --format '{{json .Config.Labels}}' | jq
+```
+
+Check the published multi-architecture digests:
+
+```bash
+docker buildx imagetools inspect marcelorodrigo/sendy:latest
+```
+
+The `org.opencontainers.image.source` label and the digests should match this repository and
+the corresponding [workflow run](https://github.com/marcelorodrigo/sendy/actions/workflows/build-and-push.yml).
+
+## License
+
+The Docker packaging in this repository is released under the [MIT License](LICENSE).
+Sendy itself is commercial software and requires a valid Sendy license. This project is
+not affiliated with or endorsed by Sendy.
+
+## Building Your Own Image
 
 You can build your own image by cloning this repository. A Sendy license is required to use the application.
 
 ```bash
-git clone git@github.com:marcelorodrigo/sendy.git
+git clone https://github.com/marcelorodrigo/sendy.git
+cd sendy
 export SENDY_LICENSE_KEY=your_license_key_here
-docker build -t my-sendy-docker --build-arg .
+export SENDY_VERSION=7.1.7  # must match the current Sendy release
+docker build \
+  --build-arg SENDY_VERSION="${SENDY_VERSION}" \
+  --secret id=SENDY_LICENSE_KEY,env=SENDY_LICENSE_KEY \
+  -t "my-sendy:${SENDY_VERSION}" .
 ```
-Make sure to keep your license key safe and never commit it to version control or share it publicly.
+
+The `SENDY_VERSION` build argument must match the current Sendy release; the build fails if the
+downloaded version differs. Check the latest version at
+[sendy.co](https://sendy.co/?ref=AQhuL) or from the
+[version endpoint](https://gateway.sendy.co/version-checker). Make sure to keep your license key
+safe and never commit it to version control or share it publicly.
