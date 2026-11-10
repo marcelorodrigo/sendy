@@ -41,6 +41,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Set build metadata
+        id: meta
+        run: echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Build and load (linux/amd64)
         uses: docker/build-push-action@v7
         with:
@@ -51,10 +55,41 @@ jobs:
           tags: sendy:pr-smoke-test
           build-args: |
             SENDY_VERSION=${{ steps.resolve_version.outputs.version }}
+            BUILD_REVISION=${{ github.sha }}
+            BUILD_CREATED=${{ steps.meta.outputs.created }}
           secrets: |
             SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
           cache-from: type=gha,scope=sendy-amd64
           cache-to: type=gha,mode=max,scope=sendy-amd64
+
+      - name: Verify OCI image labels
+        env:
+          EXPECTED_SOURCE: https://github.com/marcelorodrigo/sendy
+          EXPECTED_VERSION: ${{ steps.resolve_version.outputs.version }}
+          EXPECTED_REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          LABELS=$(docker inspect -f '{{json .Config.Labels}}' sendy:pr-smoke-test)
+          echo "$LABELS" | jq
+
+          SOURCE=$(echo "$LABELS" | jq -r '."org.opencontainers.image.source"')
+          VERSION=$(echo "$LABELS" | jq -r '."org.opencontainers.image.version"')
+          REVISION=$(echo "$LABELS" | jq -r '."org.opencontainers.image.revision"')
+
+          if [ "$SOURCE" != "$EXPECTED_SOURCE" ]; then
+            echo "::error::Expected org.opencontainers.image.source '${EXPECTED_SOURCE}', got '${SOURCE}'."
+            exit 1
+          fi
+          if [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+            echo "::error::Expected org.opencontainers.image.version '${EXPECTED_VERSION}', got '${VERSION}'."
+            exit 1
+          fi
+          if [ "$REVISION" != "$EXPECTED_REVISION" ]; then
+            echo "::error::Expected org.opencontainers.image.revision '${EXPECTED_REVISION}', got '${REVISION}'."
+            exit 1
+          fi
+          echo "OCI labels verified."
 
       - name: Boot smoke test
         run: |
@@ -149,6 +184,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Set build metadata
+        id: meta
+        run: echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Build check (linux/arm64, no load)
         uses: docker/build-push-action@v7
         with:
@@ -158,6 +197,8 @@ jobs:
           load: false
           build-args: |
             SENDY_VERSION=${{ steps.resolve_version.outputs.version }}
+            BUILD_REVISION=${{ github.sha }}
+            BUILD_CREATED=${{ steps.meta.outputs.created }}
           secrets: |
             SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
           cache-from: type=gha,scope=sendy-arm64

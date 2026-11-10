@@ -75,6 +75,10 @@ jobs:
           fi
           echo "Version check passed: ${REQUESTED_VERSION} is the current Sendy release."
 
+      - name: Set build metadata
+        id: meta
+        run: echo "created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push platform image
         id: build
         uses: docker/build-push-action@v7
@@ -84,6 +88,8 @@ jobs:
           outputs: type=image,name=marcelorodrigo/sendy,push-by-digest=true,name-canonical=true,push=true
           build-args: |
             SENDY_VERSION=${{ inputs.version }}
+            BUILD_REVISION=${{ github.sha }}
+            BUILD_CREATED=${{ steps.meta.outputs.created }}
           secrets: |
             SENDY_LICENSE_KEY=${{ secrets.SENDY_LICENSE_KEY }}
           cache-from: type=gha,scope=sendy-release-${{ matrix.arch }}
@@ -149,9 +155,15 @@ jobs:
           fi
 
           docker buildx imagetools create \
+            --annotation "org.opencontainers.image.source=https://github.com/marcelorodrigo/sendy" \
+            --annotation "org.opencontainers.image.version=${VERSION}" \
+            --annotation "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --tag "${IMAGE}:${VERSION}" \
             "${sources[@]}"
           docker buildx imagetools create \
+            --annotation "org.opencontainers.image.source=https://github.com/marcelorodrigo/sendy" \
+            --annotation "org.opencontainers.image.version=${VERSION}" \
+            --annotation "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --tag "${IMAGE}:latest" \
             "${sources[@]}"
 
