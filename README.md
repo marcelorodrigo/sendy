@@ -115,33 +115,6 @@ all available tags on [Docker Hub](https://hub.docker.com/r/marcelorodrigo/sendy
 Sendy includes English (en_US) translations by default.
 To provide custom translations or add additional languages, see [LOCALE.md](doc/LOCALE.md) for detailed instructions.
 
-## Source and Build Provenance
-
-This image is built and published by GitHub Actions from
-[marcelorodrigo/sendy](https://github.com/marcelorodrigo/sendy) using the
-[build-and-push workflow](https://github.com/marcelorodrigo/sendy/blob/master/.github/workflows/build-and-push.yml).
-
-- Multi-architecture images for `linux/amd64` and `linux/arm64`.
-- Based on `serversideup/php:8.5-fpm-apache-v5.0.5`.
-- Each platform is built separately, published by digest, then combined into the version and `latest` tags.
-- The Sendy license key is supplied as a BuildKit secret at build time and is never stored in the image or the repository.
-
-Every image carries OCI metadata labels. Inspect them on a pulled image:
-
-```bash
-docker image inspect marcelorodrigo/sendy:latest \
-  --format '{{json .Config.Labels}}' | jq
-```
-
-Check the published multi-architecture digests:
-
-```bash
-docker buildx imagetools inspect marcelorodrigo/sendy:latest
-```
-
-The `org.opencontainers.image.source` label and the digests should match this repository and
-the corresponding [workflow run](https://github.com/marcelorodrigo/sendy/actions/workflows/build-and-push.yml).
-
 ## License
 
 The Docker packaging in this repository is released under the [MIT License](LICENSE).
