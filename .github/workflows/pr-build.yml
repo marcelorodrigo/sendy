@@ -66,6 +66,7 @@ jobs:
         env:
           EXPECTED_SOURCE: https://github.com/marcelorodrigo/sendy
           EXPECTED_VERSION: ${{ steps.resolve_version.outputs.version }}
+          EXPECTED_REVISION: ${{ github.sha }}
         run: |
           set -euo pipefail
 
@@ -84,8 +85,8 @@ jobs:
             echo "::error::Expected org.opencontainers.image.version '${EXPECTED_VERSION}', got '${VERSION}'."
             exit 1
           fi
-          if [ -z "$REVISION" ] || [ "$REVISION" = "null" ]; then
-            echo "::error::org.opencontainers.image.revision label is missing."
+          if [ "$REVISION" != "$EXPECTED_REVISION" ]; then
+            echo "::error::Expected org.opencontainers.image.revision '${EXPECTED_REVISION}', got '${REVISION}'."
             exit 1
           fi
           echo "OCI labels verified."
