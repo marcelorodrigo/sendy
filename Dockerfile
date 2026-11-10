@@ -104,6 +104,24 @@ COPY --chmod=755 user-bundles.d/ /etc/s6-overlay/user-bundles.d/
 ENV APACHE_DOCUMENT_ROOT="/var/www/html"
 ENV PHP_OPCACHE_ENABLE=1
 
+# OCI metadata. These labels override the base image values so the published
+# image points at this repository instead of serversideup/docker-php.
+ARG SENDY_VERSION
+ARG BUILD_REVISION=unknown
+ARG BUILD_CREATED=unknown
+LABEL org.opencontainers.image.title="Sendy" \
+      org.opencontainers.image.description="Self-hosted Sendy email newsletter app on PHP 8.5 with Apache, health checks and Cloudflare support" \
+      org.opencontainers.image.url="https://github.com/marcelorodrigo/sendy" \
+      org.opencontainers.image.source="https://github.com/marcelorodrigo/sendy" \
+      org.opencontainers.image.documentation="https://github.com/marcelorodrigo/sendy/blob/master/README.md" \
+      org.opencontainers.image.vendor="Marcelo Rodrigo" \
+      org.opencontainers.image.authors="Marcelo Rodrigo" \
+      org.opencontainers.image.version="${SENDY_VERSION}" \
+      org.opencontainers.image.revision="${BUILD_REVISION}" \
+      org.opencontainers.image.created="${BUILD_CREATED}" \
+      org.opencontainers.image.licenses="MIT AND LicenseRef-Sendy-Commercial" \
+      org.opencontainers.image.base.name="docker.io/serversideup/php:8.5-fpm-apache-v5.0.5"
+
 # Switch to www-data user for runtime
 USER www-data
 VOLUME ["/var/www/html/uploads", "/var/www/html/locale"]

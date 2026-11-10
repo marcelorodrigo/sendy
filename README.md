@@ -29,7 +29,7 @@ For official Sendy licensing, support and documentation: please visit [Sendy.co]
 - 🌐 **Web Server Features**: `.htaccess` support with `mod_rewrite` enabled
 - 📦 **PHP Extensions**: All PHP extensions required by Sendy installed and enabled
 - 🚀 **Latest PHP**: PHP 8.5 with opcache enabled
-- 💾 **Volume Support**: Support for `/upload` volume
+- 💾 **Volume Support**: Support for `/var/www/html/uploads` and `/var/www/html/locale` volumes
 - 🌍 **Translations**: Support for custom Sendy translations
 - 🏗️ **Multi-Architecture**: `amd64` and `arm64` native support
 
@@ -85,6 +85,17 @@ volumes:
   mysql_data:
 ```
 
+## Image Tags
+
+| Tag | Description |
+|-----|-------------|
+| `latest` | The most recent Sendy release. Rebuilt each time a new Sendy version is published. |
+| `X.Y.Z` | Pinned to that Sendy release (for example `7.1.7`). For fully reproducible deployments, pin the image digest (`marcelorodrigo/sendy@sha256:...`), because a tag can be republished with different image contents. |
+
+Only the current Sendy release is published. The Sendy download endpoint serves the latest
+version your license is entitled to, so older release tags are not rebuilt automatically. Browse
+all available tags on [Docker Hub](https://hub.docker.com/r/marcelorodrigo/sendy/tags).
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
@@ -102,15 +113,32 @@ volumes:
 ## Custom Translations
 
 Sendy includes English (en_US) translations by default.
-To provide custom translations or add additional languages, see [LOCALE.md](LOCALE.md) for detailed instructions.
+To provide custom translations or add additional languages, see [LOCALE.md](doc/LOCALE.md) for detailed instructions.
 
-## Building your own image
+## License
+
+The Docker packaging in this repository is released under the [MIT License](LICENSE).
+Sendy itself is commercial software and requires a valid Sendy license. This project is
+not affiliated with or endorsed by Sendy.
+
+## Building Your Own Image
 
 You can build your own image by cloning this repository. A Sendy license is required to use the application.
 
 ```bash
-git clone git@github.com:marcelorodrigo/sendy.git
+git clone https://github.com/marcelorodrigo/sendy.git
+cd sendy
 export SENDY_LICENSE_KEY=your_license_key_here
-docker build -t my-sendy-docker --build-arg .
+export SENDY_VERSION=7.1.7  # must match the version your license downloads
+docker build \
+  --build-arg SENDY_VERSION="${SENDY_VERSION}" \
+  --secret id=SENDY_LICENSE_KEY,env=SENDY_LICENSE_KEY \
+  -t "my-sendy:${SENDY_VERSION}" .
 ```
-Make sure to keep your license key safe and never commit it to version control or share it publicly.
+
+The `SENDY_VERSION` build argument must match the version your license is entitled to and the
+version actually downloaded during the build; the build fails if the downloaded version differs.
+The public latest release is informational guidance only — see
+[sendy.co](https://sendy.co/?ref=AQhuL) or the
+[version endpoint](https://gateway.sendy.co/version-checker). Make sure to keep your license key
+safe and never commit it to version control or share it publicly.
