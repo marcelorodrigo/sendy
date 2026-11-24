@@ -85,7 +85,7 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
     echo "Sendy download complete (version ${ACTUAL_VERSION})."
 
 # Stage 2: Final image
-FROM serversideup/php:8.5-fpm-apache-v5.0.5
+FROM serversideup/php:8.5-fpm-apache-v5.2.2
 
 USER root
 
@@ -137,7 +137,7 @@ LABEL org.opencontainers.image.title="Sendy" \
       org.opencontainers.image.revision="${BUILD_REVISION}" \
       org.opencontainers.image.created="${BUILD_CREATED}" \
       org.opencontainers.image.licenses="MIT AND LicenseRef-Sendy-Commercial" \
-      org.opencontainers.image.base.name="docker.io/serversideup/php:8.5-fpm-apache-v5.0.5"
+      org.opencontainers.image.base.name="docker.io/serversideup/php:8.5-fpm-apache-v5.2.2"
 
 # Switch to www-data user for runtime
 USER www-data
