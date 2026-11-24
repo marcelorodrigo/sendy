@@ -24,13 +24,20 @@ ARG SENDY_VERSION
 # Download and extract Sendy using build secret
 RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
     set -e && \
+    report_download_failure() { \
+        echo "--- sendy.co response headers (safe subset) ---" >&2; \
+        grep -iE '^(content-type|content-length|content-disposition):' headers.txt >&2 || true; \
+        echo "--- First 200 bytes of the downloaded body (non-printables shown as '.') ---" >&2; \
+        head -c 200 sendy.zip 2>/dev/null | tr -c '[:print:]\n' '.' >&2 || true; \
+        echo "" >&2; \
+    } && \
     if [ -z "$SENDY_VERSION" ]; then \
         echo "ERROR: SENDY_VERSION build argument is required but was not provided." >&2 && \
         echo "Pass it with: docker build --build-arg SENDY_VERSION=<X.Y.Z>" >&2 && \
         exit 1; \
     fi && \
     echo "Downloading Sendy (expecting version ${SENDY_VERSION})..." && \
-    if ! curl -fsSL -D headers.txt -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/SENDY_LICENSE_KEY)"; then \
+    if ! curl -fsSL --retry 3 --retry-all-errors --retry-delay 5 -D headers.txt -o sendy.zip "https://sendy.co/download/?license=$(cat /run/secrets/SENDY_LICENSE_KEY)"; then \
         echo "ERROR: Failed to download Sendy. Please verify:" >&2 && \
         echo "  - Your SENDY_LICENSE_KEY secret is correct" >&2 && \
         echo "  - You have an active Sendy license" >&2 && \
@@ -38,9 +45,19 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
         exit 1; \
     fi && \
     echo "Validating download..." && \
+    RESPONSE_TYPE=$(grep -i '^content-type:' headers.txt | tail -n1 | sed 's/^[^:]*:[[:space:]]*//; s/\r$//') && \
+    if [ "$RESPONSE_TYPE" != "application/zip" ]; then \
+        echo "ERROR: sendy.co responded with 'Content-Type: ${RESPONSE_TYPE}', not application/zip." >&2 && \
+        echo "This usually means the license key is invalid or expired, or sendy.co served" >&2 && \
+        echo "an error or challenge page instead of the archive (common for CI runner IPs)." >&2 && \
+        report_download_failure && \
+        exit 1; \
+    fi && \
     if ! unzip -t sendy.zip >/dev/null 2>&1; then \
         echo "ERROR: Downloaded file is not a valid ZIP archive." >&2 && \
-        echo "This usually means the license key is invalid or expired." >&2 && \
+        echo "This usually means the license key is invalid or expired, or the download" >&2 && \
+        echo "was truncated or replaced by an error page." >&2 && \
+        report_download_failure && \
         exit 1; \
     fi && \
     echo "Verifying downloaded version..." && \
