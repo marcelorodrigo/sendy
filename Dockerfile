@@ -85,7 +85,7 @@ RUN --mount=type=secret,id=SENDY_LICENSE_KEY \
     echo "Sendy download complete (version ${ACTUAL_VERSION})."
 
 # Stage 2: Final image
-FROM serversideup/php:8.5-fpm-apache-v5.2.2
+FROM serversideup/php:8.6-fpm-apache-v5.2.2
 
 USER root
 
